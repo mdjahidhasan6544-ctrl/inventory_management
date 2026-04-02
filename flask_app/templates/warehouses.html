@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Warehouses{% endblock %}
+{% block page_title %}Warehouses{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h2 style="font-size: 14px; color: var(--text-muted);">{{ warehouses | length }} warehouse{{ 's' if warehouses | length != 1 else '' }}</h2>
+    </div>
+    <a href="{{ url_for('add_warehouse') }}" class="btn btn-primary" id="btn-add-warehouse">
+        <i class="fas fa-plus"></i> Add Warehouse
+    </a>
+</div>
+
+{% if warehouses %}
+<div class="warehouse-grid stagger-children">
+    {% for wh in warehouses %}
+    <div class="warehouse-card">
+        <div class="warehouse-card-header">
+            <div class="warehouse-card-title">
+                <div class="warehouse-icon">
+                    <i class="fas fa-warehouse"></i>
+                </div>
+                <div>
+                    <div class="warehouse-name">{{ wh.name }}</div>
+                    <div class="warehouse-code">{{ wh.code }}</div>
+                </div>
+            </div>
+            {% if wh.is_active %}
+            <span class="status-badge status-active"><i class="fas fa-circle" style="font-size: 6px;"></i> Active</span>
+            {% else %}
+            <span class="status-badge status-inactive"><i class="fas fa-circle" style="font-size: 6px;"></i> Inactive</span>
+            {% endif %}
+        </div>
+
+        <div class="warehouse-details">
+            {% if wh.address %}
+            <div class="warehouse-detail">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ wh.address }}
+            </div>
+            {% endif %}
+            {% if wh.city or wh.state %}
+            <div class="warehouse-detail">
+                <i class="fas fa-city"></i>
+                {{ wh.city }}{% if wh.state %}, {{ wh.state }}{% endif %}{% if wh.postal_code %} {{ wh.postal_code }}{% endif %}
+            </div>
+            {% endif %}
+            <div class="warehouse-detail">
+                <i class="fas fa-globe"></i>
+                {{ wh.country }}
+            </div>
+        </div>
+
+        <div class="warehouse-stats">
+            <div class="warehouse-stat">
+                <div class="warehouse-stat-value">{{ wh.products | length }}</div>
+                <div class="warehouse-stat-label">Products</div>
+            </div>
+            <div class="warehouse-stat">
+                <div class="warehouse-stat-value">{{ wh.transactions | length }}</div>
+                <div class="warehouse-stat-label">Transactions</div>
+            </div>
+        </div>
+
+        <div class="warehouse-actions">
+            <a href="{{ url_for('edit_warehouse', wh_id=wh.id) }}" class="btn btn-sm btn-secondary" style="flex:1; justify-content:center;">
+                <i class="fas fa-pen"></i> Edit
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="section-card">
+    <div class="empty-state">
+        <i class="fas fa-warehouse"></i>
+        <h3>No Warehouses Yet</h3>
+        <p>Add your first warehouse location</p>
+        <a href="{{ url_for('add_warehouse') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Add Warehouse
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Transactions{% endblock %}
+{% block page_title %}Transactions{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h2 style="font-size:14px;color:var(--text-muted);">{{ transactions|length }} transaction{{ 's' if transactions|length != 1 else '' }}</h2>
+    </div>
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary"><i class="fas fa-plus"></i> New Transaction</a>
+</div>
+<form method="GET" action="{{ url_for('transactions') }}">
+<div class="filters-bar">
+    <select class="filter-select" name="type">
+        <option value="">All Types</option>
+        {% for v,l in [('purchase','Purchase'),('sale','Sale'),('transfer_in','Transfer In'),('transfer_out','Transfer Out'),('adjustment','Adjustment'),('return','Return')] %}
+        <option value="{{v}}" {% if tx_type==v %}selected{% endif %}>{{l}}</option>
+        {% endfor %}
+    </select>
+    <select class="filter-select" name="product">
+        <option value="">All Products</option>
+        {% for p in products %}<option value="{{p.id}}" {% if product_id==p.id %}selected{% endif %}>{{p.name}}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Filter</button>
+    {% if tx_type or product_id %}<a href="{{ url_for('transactions') }}" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i> Clear</a>{% endif %}
+</div>
+</form>
+<div class="section-card animate-slide-up">
+<div class="table-container">
+{% if transactions %}
+<table class="data-table">
+<thead><tr><th>Date</th><th>Type</th><th>Product</th><th>Qty</th><th>Before → After</th><th>Warehouse</th><th>Ref</th><th>By</th></tr></thead>
+<tbody>
+{% for tx in transactions %}
+<tr>
+<td><div style="font-weight:600;font-size:13px">{{tx.created_at.strftime('%b %d, %Y')}}</div><div style="font-size:12px;color:var(--text-muted)">{{tx.created_at.strftime('%I:%M %p')}}</div></td>
+<td><span class="tx-badge tx-{{tx.transaction_type}}"><i class="fas {% if tx.quantity>0 %}fa-arrow-down{% elif tx.quantity<0 %}fa-arrow-up{% else %}fa-arrows-rotate{% endif %}" style="font-size:10px"></i> {{tx.transaction_type_display}}</span></td>
+<td><div style="font-weight:600;font-size:13px">{{tx.product.name}}</div><div style="font-size:12px;color:var(--text-muted)">{{tx.product.sku}}</div></td>
+<td><span class="fw-700 {% if tx.quantity>0 %}text-success{% elif tx.quantity<0 %}text-danger{% endif %}">{{ '+' if tx.quantity>0 else '' }}{{tx.quantity}}</span></td>
+<td><span class="mono">{{tx.quantity_before}}</span> <i class="fas fa-arrow-right" style="font-size:10px;color:var(--text-muted)"></i> <span class="mono fw-600">{{tx.quantity_after}}</span></td>
+<td>{{tx.warehouse.name if tx.warehouse else '—'}}</td>
+<td>{% if tx.reference %}<span class="mono" style="font-size:12px">{{tx.reference}}</span>{% else %}—{% endif %}</td>
+<td>{{tx.performed_by.full_name if tx.performed_by else '—'}}</td>
+</tr>
+{% endfor %}
+</tbody></table>
+{% else %}
+<div class="empty-state"><i class="fas fa-exchange-alt"></i><h3>No Transactions Found</h3><p>Record your first inventory transaction</p><a href="{{ url_for('add_transaction') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New Transaction</a></div>
+{% endif %}
+</div></div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Categories{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h2 style="font-size: 14px; color: var(--text-muted);">{{ categories | length }} categor{{ 'ies' if categories | length != 1 else 'y' }}</h2>
+    </div>
+    <a href="{{ url_for('add_category') }}" class="btn btn-primary" id="btn-add-category">
+        <i class="fas fa-plus"></i> Add Category
+    </a>
+</div>
+
+{% if categories %}
+<div class="category-grid stagger-children">
+    {% for cat in categories %}
+    <div class="category-card">
+        <div class="category-card-icon">
+            <i class="fas fa-tag"></i>
+        </div>
+        <div class="category-card-name">{{ cat.name }}</div>
+        <div class="category-card-slug">/{{ cat.slug }}</div>
+        {% if cat.description %}
+        <div class="category-card-desc">{{ cat.description }}</div>
+        {% else %}
+        <div class="category-card-desc text-muted" style="font-style: italic;">No description</div>
+        {% endif %}
+        {% if cat.parent %}
+        <div style="margin-bottom: 12px;">
+            <span style="font-size: 12px; color: var(--text-muted);">
+                <i class="fas fa-level-up-alt" style="transform: rotate(90deg); margin-right: 4px;"></i>
+                Parent: {{ cat.parent.name }}
+            </span>
+        </div>
+        {% endif %}
+        <div class="category-card-meta">
+            <div class="category-product-count">
+                <i class="fas fa-cube"></i>
+                {{ cat.products | length }} product{{ 's' if cat.products | length != 1 else '' }}
+            </div>
+            <div class="category-actions">
+                <a href="{{ url_for('edit_category', cat_id=cat.id) }}" class="btn btn-sm btn-secondary btn-icon" title="Edit">
+                    <i class="fas fa-pen"></i>
+                </a>
+                <form method="POST" action="{{ url_for('delete_category', cat_id=cat.id) }}" data-confirm="Delete this category?" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger btn-icon" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="section-card">
+    <div class="empty-state">
+        <i class="fas fa-tags"></i>
+        <h3>No Categories Yet</h3>
+        <p>Categories help organize your products</p>
+        <a href="{{ url_for('add_category') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Add Category
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit User' if edit_user else 'Add User' }}{% endblock %}
+{% block page_title %}{{ 'Edit User' if edit_user else 'Add User' }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <a href="{{ url_for('users') }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <div>
+            <h2 style="font-size:20px;font-weight:700">{{ 'Edit User' if edit_user else 'Add Team Member' }}</h2>
+            <p style="font-size:13px;color:var(--text-muted)">{{ 'Update user details' if edit_user else 'Invite a new team member' }}</p>
+        </div>
+    </div>
+</div>
+<div class="form-card animate-slide-up">
+<form method="POST" action="{{ url_for('edit_user', user_id=edit_user.id) if edit_user else url_for('add_user') }}">
+    <div class="form-grid">
+        {% if not edit_user %}
+        <div class="form-group">
+            <label class="form-label" for="username">Username *</label>
+            <input type="text" class="form-input" id="username" name="username" required placeholder="Username">
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label class="form-label" for="email">Email *</label>
+            <input type="email" class="form-input" id="email" name="email" value="{{edit_user.email if edit_user else ''}}" required placeholder="Email">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="first_name">First Name</label>
+            <input type="text" class="form-input" id="first_name" name="first_name" value="{{edit_user.first_name if edit_user else ''}}" placeholder="First name">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="last_name">Last Name</label>
+            <input type="text" class="form-input" id="last_name" name="last_name" value="{{edit_user.last_name if edit_user else ''}}" placeholder="Last name">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="phone">Phone</label>
+            <input type="text" class="form-input" id="phone" name="phone" value="{{edit_user.phone if edit_user else ''}}" placeholder="Phone number">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="role">Role *</label>
+            <select class="form-select" id="role" name="role">
+                {% for v,l in [('owner','Owner'),('admin','Admin'),('manager','Manager'),('viewer','Viewer')] %}
+                <option value="{{v}}" {% if edit_user and edit_user.role==v %}selected{% endif %}>{{l}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="password">Password {{ '(leave blank to keep)' if edit_user else '*' }}</label>
+            <input type="password" class="form-input" id="password" name="password" placeholder="Password" {{ '' if edit_user else 'required' }}>
+        </div>
+        {% if edit_user %}
+        <div class="form-group">
+            <label class="form-label">Status</label>
+            <label class="form-check" style="margin-top:8px"><input type="checkbox" name="is_active" {% if edit_user.is_active %}checked{% endif %}><span>Active</span></label>
+        </div>
+        {% endif %}
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {{ 'Update User' if edit_user else 'Create User' }}</button>
+        <a href="{{ url_for('users') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

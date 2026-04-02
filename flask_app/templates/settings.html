@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+{% block content %}
+<div class="settings-grid stagger-children">
+    <!-- Organization Info -->
+    <div class="settings-card">
+        <h3><i class="fas fa-building"></i> Organization</h3>
+        {% if current_user.is_org_admin %}
+        <form method="POST" action="{{ url_for('settings') }}">
+            <div class="form-group">
+                <label class="form-label">Organization Name</label>
+                <input type="text" class="form-input" name="name" value="{{current_org.name}}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Plan</label>
+                <select class="form-select" name="plan">
+                    {% for v,l in [('free','Free'),('starter','Starter'),('professional','Professional'),('enterprise','Enterprise')] %}
+                    <option value="{{v}}" {% if current_org.plan==v %}selected{% endif %}>{{l}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save"></i> Save Changes</button>
+        </form>
+        {% else %}
+        <div class="settings-item"><span class="settings-item-label">Name</span><span class="settings-item-value">{{current_org.name}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Slug</span><span class="settings-item-value mono">{{current_org.slug}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Plan</span><span class="settings-item-value">{{current_org.plan|capitalize}}</span></div>
+        {% endif %}
+    </div>
+
+    <!-- Organization Limits -->
+    <div class="settings-card">
+        <h3><i class="fas fa-chart-bar"></i> Usage & Limits</h3>
+        <div class="settings-item"><span class="settings-item-label">Plan</span><span class="settings-item-value" style="color:var(--accent-primary)">{{current_org.plan|capitalize}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Max Users</span><span class="settings-item-value">{{current_org.max_users}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Max Warehouses</span><span class="settings-item-value">{{current_org.max_warehouses}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Slug</span><span class="settings-item-value mono">{{current_org.slug}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Created</span><span class="settings-item-value">{{current_org.created_at.strftime('%b %d, %Y')}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Status</span><span class="settings-item-value">{{'Active' if current_org.is_active else 'Inactive'}}</span></div>
+    </div>
+
+    <!-- Your Profile -->
+    <div class="settings-card">
+        <h3><i class="fas fa-user-circle"></i> Your Profile</h3>
+        <div class="settings-item"><span class="settings-item-label">Username</span><span class="settings-item-value">{{current_user.username}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Email</span><span class="settings-item-value">{{current_user.email}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Name</span><span class="settings-item-value">{{current_user.full_name}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Role</span><span class="settings-item-value">{{current_user.role|capitalize}}</span></div>
+        <div class="settings-item"><span class="settings-item-label">Joined</span><span class="settings-item-value">{{current_user.date_joined.strftime('%b %d, %Y')}}</span></div>
+    </div>
+
+    <!-- App Info -->
+    <div class="settings-card">
+        <h3><i class="fas fa-info-circle"></i> About</h3>
+        <div class="settings-item"><span class="settings-item-label">Application</span><span class="settings-item-value">InventoryPro</span></div>
+        <div class="settings-item"><span class="settings-item-label">Version</span><span class="settings-item-value mono">1.0.0</span></div>
+        <div class="settings-item"><span class="settings-item-label">Framework</span><span class="settings-item-value">Flask + SQLite</span></div>
+        <div class="settings-item"><span class="settings-item-label">Theme</span><span class="settings-item-value">Dark / Light</span></div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Grid -->
+<div class="stats-grid stagger-children">
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value" data-count="{{ total_products }}">0</div>
+                <div class="stat-subtitle">Active in inventory</div>
+            </div>
+            <div class="stat-icon purple">
+                <i class="fas fa-cube"></i>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <div class="stat-label">Categories</div>
+                <div class="stat-value" data-count="{{ total_categories }}">0</div>
+                <div class="stat-subtitle">Product categories</div>
+            </div>
+            <div class="stat-icon blue">
+                <i class="fas fa-tags"></i>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <div class="stat-label">Warehouses</div>
+                <div class="stat-value" data-count="{{ total_warehouses }}">0</div>
+                <div class="stat-subtitle">Active locations</div>
+            </div>
+            <div class="stat-icon green">
+                <i class="fas fa-warehouse"></i>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <div class="stat-label">Stock Value</div>
+                <div class="stat-value" data-count="{{ total_stock_value }}" data-prefix="$" data-decimal>$0</div>
+                <div class="stat-subtitle">Total inventory value</div>
+            </div>
+            <div class="stat-icon orange">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Grid -->
+<div class="grid-3">
+    <!-- Recent Transactions -->
+    <div class="section-card animate-slide-up">
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-clock-rotate-left" style="color: var(--accent-primary); margin-right: 8px;"></i>
+                Recent Transactions
+            </h3>
+            <a href="{{ url_for('transactions') }}" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div class="section-body">
+            {% if recent_transactions %}
+            <div class="timeline">
+                {% for tx in recent_transactions %}
+                <div class="timeline-item">
+                    <div class="timeline-dot {% if tx.quantity > 0 %}inbound{% elif tx.quantity < 0 %}outbound{% else %}neutral{% endif %}"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">{{ tx.product.name }}</div>
+                        <div class="timeline-meta">
+                            {{ tx.transaction_type_display }} · {{ tx.created_at.strftime('%b %d, %I:%M %p') }}
+                        </div>
+                    </div>
+                    <div class="timeline-qty {% if tx.quantity > 0 %}positive{% elif tx.quantity < 0 %}negative{% endif %}">
+                        {{ '+' if tx.quantity > 0 else '' }}{{ tx.quantity }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding: 40px 20px;">
+                <i class="fas fa-exchange-alt"></i>
+                <h3>No Transactions Yet</h3>
+                <p>Record your first inventory transaction</p>
+                <a href="{{ url_for('add_transaction') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> New Transaction
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Low Stock Alerts -->
+    <div class="section-card animate-slide-up" style="animation-delay: 100ms;">
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-triangle-exclamation" style="color: var(--warning); margin-right: 8px;"></i>
+                Low Stock Alerts
+            </h3>
+            <span class="section-badge badge-warning">{{ low_stock_products | length }}</span>
+        </div>
+        <div class="section-body">
+            {% if low_stock_products %}
+            <div class="alert-list">
+                {% for p in low_stock_products %}
+                <div class="alert-item">
+                    <div class="alert-item-left">
+                        <div class="alert-item-icon {% if p.quantity <= 0 %}danger{% else %}warning{% endif %}">
+                            <i class="fas {% if p.quantity <= 0 %}fa-times{% else %}fa-exclamation{% endif %}"></i>
+                        </div>
+                        <div class="alert-item-info">
+                            <div class="alert-item-name">{{ p.name }}</div>
+                            <div class="alert-item-detail">SKU: {{ p.sku }} · Min: {{ p.low_stock_threshold }}</div>
+                        </div>
+                    </div>
+                    <div class="alert-item-qty {% if p.quantity <= 0 %}text-danger{% else %}text-warning{% endif %}">
+                        {{ p.quantity }} {{ p.unit }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding: 40px 20px;">
+                <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                <h3>All Stock is Healthy</h3>
+                <p>No products below their threshold</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Category Distribution -->
+{% if category_data %}
+<div class="section-card animate-slide-up" style="animation-delay: 200ms;">
+    <div class="section-header">
+        <h3 class="section-title">
+            <i class="fas fa-chart-pie" style="color: var(--accent-secondary); margin-right: 8px;"></i>
+            Products by Category
+        </h3>
+    </div>
+    <div class="section-body">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+            {% set colors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#ec4899', '#14b8a6'] %}
+            {% for cat in category_data %}
+            <div style="flex: 1; min-width: 140px; background: var(--bg-tertiary); border-radius: var(--radius-md); padding: 16px; text-align: center;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: {{ colors[loop.index0 % colors|length] }}20; color: {{ colors[loop.index0 % colors|length] }}; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 16px;">
+                    <i class="fas fa-tag"></i>
+                </div>
+                <div style="font-size: 22px; font-weight: 800;">{{ cat.count }}</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">{{ cat.name }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="section-card animate-slide-up" style="margin-top: 24px; animation-delay: 300ms;">
+    <div class="section-header">
+        <h3 class="section-title">
+            <i class="fas fa-bolt" style="color: var(--warning); margin-right: 8px;"></i>
+            Quick Actions
+        </h3>
+    </div>
+    <div class="section-body">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+            <a href="{{ url_for('add_product') }}" class="btn btn-secondary">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
+            <a href="{{ url_for('add_transaction') }}" class="btn btn-secondary">
+                <i class="fas fa-exchange-alt"></i> New Transaction
+            </a>
+            <a href="{{ url_for('add_category') }}" class="btn btn-secondary">
+                <i class="fas fa-tag"></i> Add Category
+            </a>
+            <a href="{{ url_for('add_warehouse') }}" class="btn btn-secondary">
+                <i class="fas fa-warehouse"></i> Add Warehouse
+            </a>
+            {% if current_user.is_org_admin %}
+            <a href="{{ url_for('add_user') }}" class="btn btn-secondary">
+                <i class="fas fa-user-plus"></i> Invite User
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

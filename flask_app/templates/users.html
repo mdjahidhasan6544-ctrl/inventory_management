@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Team Members{% endblock %}
+{% block page_title %}Team Members{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h2 style="font-size:14px;color:var(--text-muted)">{{users|length}} member{{'s' if users|length!=1 else ''}}</h2>
+    </div>
+    {% if current_user.is_org_admin %}
+    <a href="{{ url_for('add_user') }}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Member</a>
+    {% endif %}
+</div>
+{% if users %}
+<div class="user-grid stagger-children">
+    {% for u in users %}
+    <div class="user-card-item">
+        <div class="user-card-avatar">{{u.full_name[:2].upper()}}</div>
+        <div class="user-card-info">
+            <div class="user-card-name">{{u.full_name}}</div>
+            <div class="user-card-email">{{u.email}}</div>
+            <span class="user-card-role role-{{u.role}}">{{u.role}}</span>
+            {% if not u.is_active %}<span class="status-badge status-inactive" style="margin-left:6px;font-size:10px">Inactive</span>{% endif %}
+        </div>
+        {% if current_user.is_org_admin and u.id != current_user.id %}
+        <a href="{{ url_for('edit_user', user_id=u.id) }}" class="btn btn-sm btn-secondary btn-icon" title="Edit"><i class="fas fa-pen"></i></a>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="section-card"><div class="empty-state"><i class="fas fa-users"></i><h3>No Members</h3></div></div>
+{% endif %}
+{% endblock %}

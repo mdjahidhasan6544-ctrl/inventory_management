@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Category' if category else 'Add Category' }}{% endblock %}
+{% block page_title %}{{ 'Edit Category' if category else 'New Category' }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <a href="{{ url_for('categories') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 style="font-size: 20px; font-weight: 700;">{{ 'Edit Category' if category else 'Add New Category' }}</h2>
+            <p style="font-size: 13px; color: var(--text-muted);">{{ 'Update category details' if category else 'Create a new product category' }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="form-card animate-slide-up">
+    <form method="POST" action="{{ url_for('edit_category', cat_id=category.id) if category else url_for('add_category') }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label" for="name">Category Name *</label>
+                <input type="text" class="form-input" id="name" name="name" value="{{ category.name if category else '' }}" placeholder="e.g. Electronics" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="slug">Slug *</label>
+                <input type="text" class="form-input" id="slug" name="slug" value="{{ category.slug if category else '' }}" placeholder="e.g. electronics" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="parent_id">Parent Category</label>
+                <select class="form-select" id="parent_id" name="parent_id">
+                    <option value="">No Parent (Top Level)</option>
+                    {% for pc in parent_categories %}
+                    <option value="{{ pc.id }}" {% if category and category.parent_id == pc.id %}selected{% endif %}>{{ pc.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group full-width">
+                <label class="form-label" for="description">Description</label>
+                <textarea class="form-textarea" id="description" name="description" placeholder="Category description...">{{ category.description if category else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check"></i> {{ 'Update Category' if category else 'Create Category' }}
+            </button>
+            <a href="{{ url_for('categories') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

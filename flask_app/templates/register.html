@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block auth_content %}
+<div class="auth-card" style="max-width: 520px;">
+    <div class="auth-logo">
+        <div class="logo-icon">
+            <i class="fas fa-boxes-stacked"></i>
+        </div>
+        <h2>Create Account</h2>
+        <p>Set up your organization and start managing inventory</p>
+    </div>
+
+    <form class="auth-form" method="POST" action="{{ url_for('register') }}">
+        <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-building" style="color: var(--accent-primary); margin-right: 6px;"></i>
+                Organization
+            </h3>
+            <div class="form-grid">
+                <div class="form-group mb-0">
+                    <label class="form-label" for="org_name">Organization Name *</label>
+                    <input type="text" class="form-input" id="org_name" name="org_name" placeholder="e.g. Acme Corp" required>
+                </div>
+                <div class="form-group mb-0">
+                    <label class="form-label" for="org_slug">Organization Slug *</label>
+                    <input type="text" class="form-input" id="org_slug" name="org_slug" placeholder="e.g. acme-corp" required>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3 style="font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-user" style="color: var(--accent-primary); margin-right: 6px;"></i>
+                Your Account
+            </h3>
+            <div class="form-grid">
+                <div class="form-group mb-0">
+                    <label class="form-label" for="first_name">First Name</label>
+                    <input type="text" class="form-input" id="first_name" name="first_name" placeholder="John">
+                </div>
+                <div class="form-group mb-0">
+                    <label class="form-label" for="last_name">Last Name</label>
+                    <input type="text" class="form-input" id="last_name" name="last_name" placeholder="Doe">
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label class="form-label" for="username">Username *</label>
+                <input type="text" class="form-input" id="username" name="username" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="email">Email *</label>
+                <input type="email" class="form-input" id="email" name="email" placeholder="you@company.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Password *</label>
+                <input type="password" class="form-input" id="password" name="password" placeholder="Create a strong password" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-submit" id="btn-register">
+            <i class="fas fa-rocket"></i>
+            Create Account
+        </button>
+    </form>
+
+    <div class="auth-footer">
+        Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+    </div>
+</div>
+{% endblock %}

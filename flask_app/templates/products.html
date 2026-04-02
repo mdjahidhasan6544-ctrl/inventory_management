@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Products{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <h2 style="font-size: 14px; color: var(--text-muted);">{{ products | length }} product{{ 's' if products | length != 1 else '' }} found</h2>
+    </div>
+    <a href="{{ url_for('add_product') }}" class="btn btn-primary" id="btn-add-product">
+        <i class="fas fa-plus"></i> Add Product
+    </a>
+</div>
+
+<!-- Filters -->
+<form method="GET" action="{{ url_for('products') }}">
+    <div class="filters-bar">
+        <input type="text" class="filter-input" name="search" value="{{ search }}" placeholder="Search by name, SKU, or barcode..." id="filter-search">
+        <select class="filter-select" name="category" id="filter-category">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+        <select class="filter-select" name="warehouse" id="filter-warehouse">
+            <option value="">All Warehouses</option>
+            {% for wh in warehouses %}
+            <option value="{{ wh.id }}" {% if warehouse_id == wh.id %}selected{% endif %}>{{ wh.name }}</option>
+            {% endfor %}
+        </select>
+        <select class="filter-select" name="stock" id="filter-stock">
+            <option value="">All Stock Levels</option>
+            <option value="low" {% if stock_filter == 'low' %}selected{% endif %}>Low Stock</option>
+            <option value="out" {% if stock_filter == 'out' %}selected{% endif %}>Out of Stock</option>
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        {% if search or category_id or warehouse_id or stock_filter %}
+        <a href="{{ url_for('products') }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-times"></i> Clear
+        </a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Products Table -->
+<div class="section-card animate-slide-up">
+    <div class="table-container">
+        {% if products %}
+        <table class="data-table" id="products-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Warehouse</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Stock Value</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td>
+                        <div class="cell-product">
+                            <div class="product-icon">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <div class="product-info">
+                                <div class="product-name">{{ p.name }}</div>
+                                <div class="product-sku">{{ p.sku }}{% if p.barcode %} · {{ p.barcode }}{% endif %}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if p.category %}
+                        <span class="status-badge" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-secondary);">{{ p.category.name }}</span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.warehouse %}
+                        {{ p.warehouse.name }}
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="fw-700 {% if p.quantity <= 0 %}text-danger{% elif p.is_low_stock %}text-warning{% else %}text-success{% endif %}">
+                            {{ p.quantity }}
+                        </span>
+                        <span class="text-muted" style="font-size: 12px;">{{ p.unit }}</span>
+                    </td>
+                    <td class="fw-600">${{ "%.2f" | format(p.unit_price) }}</td>
+                    <td class="fw-600">${{ "%.2f" | format(p.stock_value) }}</td>
+                    <td>
+                        {% if not p.is_active %}
+                        <span class="status-badge status-inactive"><i class="fas fa-circle" style="font-size: 6px;"></i> Inactive</span>
+                        {% elif p.quantity <= 0 %}
+                        <span class="status-badge status-out"><i class="fas fa-circle" style="font-size: 6px;"></i> Out of Stock</span>
+                        {% elif p.is_low_stock %}
+                        <span class="status-badge status-low"><i class="fas fa-circle" style="font-size: 6px;"></i> Low Stock</span>
+                        {% else %}
+                        <span class="status-badge status-ok"><i class="fas fa-circle" style="font-size: 6px;"></i> In Stock</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{{ url_for('edit_product', product_id=p.id) }}" class="btn btn-sm btn-secondary btn-icon" title="Edit">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            {% if p.is_active %}
+                            <form method="POST" action="{{ url_for('delete_product', product_id=p.id) }}" data-confirm="Deactivate this product?" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger btn-icon" title="Deactivate">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-cube"></i>
+            <h3>No Products Found</h3>
+            <p>{% if search or category_id or warehouse_id or stock_filter %}Try adjusting your filters{% else %}Add your first product to get started{% endif %}</p>
+            <a href="{{ url_for('add_product') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

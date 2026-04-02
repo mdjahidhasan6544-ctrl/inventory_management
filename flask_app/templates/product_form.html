@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Product' if product else 'Add Product' }}{% endblock %}
+{% block page_title %}{{ 'Edit Product' if product else 'New Product' }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <a href="{{ url_for('products') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 style="font-size: 20px; font-weight: 700;">{{ 'Edit Product' if product else 'Add New Product' }}</h2>
+            <p style="font-size: 13px; color: var(--text-muted);">{{ 'Update product details' if product else 'Fill in the details below' }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="form-card animate-slide-up">
+    <form method="POST" action="{{ url_for('edit_product', product_id=product.id) if product else url_for('add_product') }}">
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label" for="name">Product Name *</label>
+                <input type="text" class="form-input" id="name" name="name" value="{{ product.name if product else '' }}" placeholder="e.g. MacBook Pro 16&quot;" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="sku">SKU *</label>
+                <input type="text" class="form-input" id="sku" name="sku" value="{{ product.sku if product else '' }}" placeholder="e.g. ELEC-001" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="barcode">Barcode</label>
+                <input type="text" class="form-input" id="barcode" name="barcode" value="{{ product.barcode if product else '' }}" placeholder="Optional barcode">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="unit">Unit</label>
+                <select class="form-select" id="unit" name="unit">
+                    {% set units = [('pcs', 'Pieces'), ('kg', 'Kilograms'), ('lbs', 'Pounds'), ('lt', 'Litres'), ('m', 'Metres'), ('box', 'Boxes')] %}
+                    {% for val, label in units %}
+                    <option value="{{ val }}" {% if product and product.unit == val %}selected{% elif not product and val == 'pcs' %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="category_id">Category</label>
+                <select class="form-select" id="category_id" name="category_id">
+                    <option value="">No Category</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if product and product.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="warehouse_id">Warehouse</label>
+                <select class="form-select" id="warehouse_id" name="warehouse_id">
+                    <option value="">No Warehouse</option>
+                    {% for wh in warehouses %}
+                    <option value="{{ wh.id }}" {% if product and product.warehouse_id == wh.id %}selected{% endif %}>{{ wh.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="unit_price">Unit Price ($) *</label>
+                <input type="number" step="0.01" min="0" class="form-input" id="unit_price" name="unit_price" value="{{ product.unit_price if product else '0.00' }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="cost_price">Cost Price ($)</label>
+                <input type="number" step="0.01" min="0" class="form-input" id="cost_price" name="cost_price" value="{{ product.cost_price if product else '0.00' }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="low_stock_threshold">Low Stock Threshold</label>
+                <input type="number" min="0" class="form-input" id="low_stock_threshold" name="low_stock_threshold" value="{{ product.low_stock_threshold if product else '10' }}">
+            </div>
+            {% if product %}
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <label class="form-check" style="margin-top: 8px;">
+                    <input type="checkbox" name="is_active" {% if product.is_active %}checked{% endif %}>
+                    <span>Active</span>
+                </label>
+            </div>
+            {% endif %}
+            <div class="form-group full-width">
+                <label class="form-label" for="description">Description</label>
+                <textarea class="form-textarea" id="description" name="description" placeholder="Product description...">{{ product.description if product else '' }}</textarea>
+            </div>
+        </div>
+
+        {% if product %}
+        <div style="background: var(--bg-tertiary); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Current Stock</span>
+                    <div style="font-size: 20px; font-weight: 700; color: {% if product.quantity <= 0 %}var(--danger){% elif product.is_low_stock %}var(--warning){% else %}var(--success){% endif %};">{{ product.quantity }} {{ product.unit }}</div>
+                </div>
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Stock Value</span>
+                    <div style="font-size: 20px; font-weight: 700;">${{ "%.2f" | format(product.stock_value) }}</div>
+                </div>
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Created</span>
+                    <div style="font-size: 14px; font-weight: 600;">{{ product.created_at.strftime('%b %d, %Y') }}</div>
+                </div>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                <i class="fas fa-info-circle"></i> Stock quantity is managed through transactions only.
+            </p>
+        </div>
+        {% endif %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check"></i> {{ 'Update Product' if product else 'Create Product' }}
+            </button>
+            <a href="{{ url_for('products') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
